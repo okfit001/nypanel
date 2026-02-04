@@ -78,3 +78,65 @@ apt-get install -y chrony docker.io docker-compose
 mkdir -p /opt/backend
 cd /opt/backend
 bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-install.sh) rel_backend
+
+>/opt/backend/config.yml
+sudo sh -c 'echo "services:
+  nya:
+    image: alpine
+    network_mode: host
+    restart: always
+    volumes:
+      - .:/opt/backend
+    working_dir: /opt/backend
+    command: ./rel_backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+  caddy:
+    image: caddy:2-alpine
+    network_mode: host
+    restart: always
+    volumes:
+      - .:/opt/backend
+      - ./caddy:/etc/caddy
+      - ./caddy_data:/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+" > /opt/backend/docker-compose.yaml'
+
+mkdir -p /opt/backend/caddy
+sudo sh -c 'echo "{
+    servers {
+        protocols h1 h2
+    }
+    https_port 8443
+}
+
+domain.com {
+    ## TLS 必须配置，请在下面选择一种配置方法
+
+    # TLS 本地证书
+    tls /opt/backend/caddy/domain.crt /opt/backend/caddy/domain.key
+    # TLS 自动申请（适合 直连面板服务器 的用户）
+    # tls your@email.com
+
+    # TLS 自签（适合套 CDN 加速的用户）
+    #tls internal
+
+    # 前端资源
+    file_server {
+        root /opt/backend/public
+    }
+
+    # /api/* 反代到 backend
+    reverse_proxy /api/* http://127.0.0.1:18888 {
+        trusted_proxies 127.0.0.0/8 173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 104.24.0.0/14 172.64.0.0/13 131.0.72.0/22 2400:cb00::/32 2606:4700::/32 2803:f800::/32 2405:b500::/32  2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32
+        header_up CF-Connecting-IP {http.request.header.CF-Connecting-IP}
+    }
+}
+" > /opt/backend/caddy/Caddyfile'
