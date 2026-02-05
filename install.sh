@@ -80,7 +80,8 @@ cd /opt/backend
 bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-install.sh) rel_backend
 
 >/opt/backend/config.yml
-sudo sh -c 'echo "services:
+cat > /opt/backend/docker-compose.yaml << EOF 
+services:
   nya:
     image: alpine
     network_mode: host
@@ -106,7 +107,8 @@ sudo sh -c 'echo "services:
       driver: "json-file"
       options:
         max-size: "50m"
-        max-file: "3"" > /opt/backend/docker-compose.yaml'
+        max-file: "3"
+EOF
 
 mkdir -p /opt/backend/caddy
 sudo sh -c 'echo "{
