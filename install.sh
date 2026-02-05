@@ -80,7 +80,7 @@ cd /opt/backend
 bash <(curl -fLSs https://dl.nyafw.com/download/nyanpass-install.sh) rel_backend
 
 >/opt/backend/config.yml
-cat > /opt/backend/docker-compose.yaml << EOF 
+cat > /opt/backend/docker-compose.yaml <<-EOF
 services:
   nya:
     image: alpine
@@ -111,7 +111,8 @@ services:
 EOF
 
 mkdir -p /opt/backend/caddy
-sudo sh -c 'echo "{
+cat > /opt/backend/caddy/Caddyfile <<-EOF
+{
     servers {
         protocols h1 h2
     }
@@ -140,4 +141,4 @@ domain.com {
         header_up CF-Connecting-IP {http.request.header.CF-Connecting-IP}
     }
 }
-" > /opt/backend/caddy/Caddyfile'
+EOF
