@@ -106,8 +106,7 @@ sudo sh -c 'echo "services:
       driver: "json-file"
       options:
         max-size: "50m"
-        max-file: "3"
-" > /opt/backend/docker-compose.yaml'
+        max-file: "3"" > /opt/backend/docker-compose.yaml'
 
 mkdir -p /opt/backend/caddy
 sudo sh -c 'echo "{
